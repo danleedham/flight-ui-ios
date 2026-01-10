@@ -1,26 +1,21 @@
-//
-//  InputField.swift
-//  flight-ui-ios
-//
-//  Created by Appivate 2023
-//
-
 import SwiftUI
 import Combine
 
+// MARK: - Input Field
+
 public struct InputField: View {
-    @EnvironmentObject var theme: Theme
-    @Environment(\.isEnabled) private var isEnabled: Bool
+    @Environment(\.theme) var theme
+    @Environment(\.isEnabled) private var isEnabled
     @FocusState var isFocused: Bool
 
     @Binding var text: String
-    var placeholder: String?
-    var topLabel: String?
-    var topLabelSpacer: Bool
-    var bottomLabelConfig: BottomLabelConfig
-    var formatter: ((String) -> String)?
-    var filter: RegexFilter?
-    var maxCharacterCount: Int?
+    let placeholder: String?
+    let topLabel: String?
+    let topLabelSpacer: Bool
+    let bottomLabelConfig: BottomLabelConfig
+    let formatter: ((String) -> String)?
+    let filter: RegexFilter?
+    let maxCharacterCount: Int?
 
     public init(
         text: Binding<String>,
@@ -43,7 +38,7 @@ public struct InputField: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: theme.padding.grid0_5x) {
+        VStack(alignment: .leading, spacing: theme.spacing.grid0_5x) {
             buildTopLabel()
             buildTextField()
             BottomLabel(bottomLabelConfig)
@@ -55,11 +50,11 @@ public struct InputField: View {
         if let top = topLabel {
             Text(top)
                 .foregroundColor(theme.color.primary)
-                .fontStyle(theme.font.subhead)
+                .fontStyle(theme.typography.subhead)
         } else if topLabelSpacer {
             Text("-")
                 .foregroundColor(theme.color.surfaceHigh.opacity(0))
-                .fontStyle(theme.font.subhead)
+                .fontStyle(theme.typography.subhead)
         }
     }
 
@@ -71,21 +66,10 @@ public struct InputField: View {
                     .foregroundColor(theme.color.primary.opacity(isEnabled ? InputFieldDefaults.hintOpacity : InputFieldDefaults.disabledOpacity))
             }
             .onReceive(Just(text)) { newValue in
-                if let regex = filter?.regex {
-                    let replaced = newValue.replacingOccurrences(of: regex, with: "", options: .regularExpression)
-                    if replaced != newValue {
-                        self.text = replaced
-                    }
-                }
-                // Limit character count
-                if let maxCount = maxCharacterCount {
-                    if text.count > maxCount {
-                        text = String(text.prefix(maxCount))
-                    }
-                }
+                applyFilters(newValue)
             }
             .focused($isFocused)
-            .onChange(of: isFocused) { newFocus in
+            .onChange(of: isFocused) { _, newFocus in
                 if !newFocus, let format = formatter {
                     text = format(text)
                 }
@@ -93,24 +77,33 @@ public struct InputField: View {
         } else {
             TextField("", text: $text)
                 .onReceive(Just(text)) { newValue in
-                    if let regex = filter?.regex {
-                        let replaced = newValue.replacingOccurrences(of: regex, with: "", options: .regularExpression)
-                        if replaced != newValue {
-                            self.text = replaced
-                        }
-                        if let maxCount = maxCharacterCount {
-                            if text.count > maxCount {
-                                text = String(text.prefix(maxCount))
-                            }
-                        }
-                    }
+                    applyFilters(newValue)
                 }
                 .focused($isFocused)
-                .onChange(of: isFocused) { newFocus in
+                .onChange(of: isFocused) { _, newFocus in
                     if !newFocus, let format = formatter {
                         text = format(text)
                     }
                 }
+        }
+    }
+
+    private func applyFilters(_ newValue: String) {
+        var modified = newValue
+
+        if let regex = filter?.regex {
+            let replaced = modified.replacingOccurrences(of: regex, with: "", options: .regularExpression)
+            if replaced != modified {
+                modified = replaced
+            }
+        }
+
+        if let maxCount = maxCharacterCount, modified.count > maxCount {
+            modified = String(modified.prefix(maxCount))
+        }
+
+        if modified != text {
+            text = modified
         }
     }
 }

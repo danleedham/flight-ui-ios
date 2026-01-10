@@ -1,12 +1,12 @@
-//
-//  RegexFilter.swift
-//  flight-ui-ios
-//
-//  Created by Appivate 2023
-//
+import Foundation
 
-public enum RegexFilter {
-    case integerOnly, doubleOnly, letterOnly, noDigits
+// MARK: - Regex Filter
+
+public enum RegexFilter: Sendable {
+    case integerOnly
+    case doubleOnly
+    case letterOnly
+    case noDigits
     case custom(String)
 
     public var regex: String {
@@ -23,4 +23,10 @@ public enum RegexFilter {
             return customValue
         }
     }
+}
+
+// MARK: - Unbound Selection Enum
+
+public protocol UnboundSelectionEnum: CaseIterable, CustomStringConvertible, Sendable {
+    static func custom(string: String) -> Self
 }

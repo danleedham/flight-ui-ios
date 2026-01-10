@@ -1,10 +1,3 @@
-//
-//  Shape+Extensions.swift
-//  flight-ui-ios
-//
-//  Created by Appivate 2023
-//
-
 import Foundation
 
 import XCTest

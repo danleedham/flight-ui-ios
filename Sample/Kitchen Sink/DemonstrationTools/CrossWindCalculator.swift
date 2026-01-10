@@ -1,10 +1,3 @@
-//
-//  Shape+Extensions.swift
-//  flight-ui-ios
-//
-//  Created by Appivate 2023
-//
-
 import SwiftUI
 import Foundation
 import FlightUI
@@ -12,22 +5,22 @@ import FlightUI
 struct CrossWindCalculator: View {
 
     @StateObject var viewModel = CrosswindCalculatorViewModel()
-    @EnvironmentObject var theme: Theme
+    @Environment(\.theme) var theme
 
     var body: some View {
         ScrollView {
             VStack {
                 windSpeedInput
                 windspeedOutput
-                    .padding([.top],theme.padding.grid8x)
+                    .padding([.top], theme.spacing.grid8x)
             }
-            .padding(theme.padding.grid2x)
+            .padding(theme.spacing.grid2x)
             .navigationBarTitle("Crosswind Calculator")
         }
     }
 
     var windSpeedInput: some View {
-        HStack() {
+        HStack {
             MenuField(selection: $viewModel.runwayNumber,
                       options: Array(1...36),
                       placeholder: "1",
@@ -56,7 +49,7 @@ struct CrossWindCalculator: View {
                        maxCharacterCount: 3)
             .textFieldStyle(.advisory)
             .frame(width: 240)
-            .padding(.top, theme.padding.grid2x)
+            .padding(.top, theme.spacing.grid2x)
 
             InputField(text: $viewModel.headwindString,
                        placeholder: "",
@@ -64,21 +57,7 @@ struct CrossWindCalculator: View {
             )
             .textFieldStyle(.advisory)
             .frame(width: 240)
-            .padding(.top, theme.padding.grid2x)
+            .padding(.top, theme.spacing.grid2x)
         }
     }
 }
-
-#if DEBUG
-
-struct CrosswindPreview: PreviewProvider {
-    static var theme: Theme = Theme(baseScheme: .dark)
-    static var previews: some View {
-        CrossWindCalculator()
-            .environmentObject(theme)
-            .previewDisplayName("CrossWind Calculator")
-            .preferredColorScheme(theme.baseScheme)
-    }
-}
-
-#endif
