@@ -12,12 +12,10 @@ struct HeadingView: View {
         VStack(alignment: .leading, spacing: theme.spacing.grid0_5x) {
             Text(title)
                 .fontStyle(theme.typography.title1)
-                .frame(maxWidth: .infinity, alignment: .leading)
             Text(subTitle)
                 .foregroundColor(theme.color.secondary)
                 .fontStyle(theme.typography.body)
-                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.bottom, theme.spacing.grid1x)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

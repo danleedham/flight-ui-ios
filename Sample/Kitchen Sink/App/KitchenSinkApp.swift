@@ -43,7 +43,7 @@ struct KitchenSinkApp: App {
                 .scrollContentBackground(.hidden)
                 .background(themeManager.current.color.background)
                 .navigationTitle("FlightUI")
-                .toolbarTitleDisplayMode(.large)
+                .toolbarTitleDisplayMode(.inline)
                 .toolbarBackground(themeManager.current.color.background, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {

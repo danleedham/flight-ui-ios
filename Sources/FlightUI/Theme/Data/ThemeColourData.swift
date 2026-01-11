@@ -19,6 +19,7 @@ public struct ThemeColorData: Sendable {
     public let caution: Color
     public let warning: Color
     public let onCore: Color
+    public var advisory: Color { nominal }
 
     // Graphics Colors
     public let graphicsRed: Color
@@ -112,26 +113,26 @@ extension ThemeColorData {
     public static var light: ThemeColorData {
         ThemeColorData(
             background: .flightGrey800,
-            surfaceLow: .flightGrey900,
-            surfaceHigh: .flightGrey700,
+            surfaceLow: .flightGrey700,
+            surfaceHigh: .flightGrey600,
             primary: .flightGrey100,
-            secondary: .flightGrey400,
+            secondary: .flightGrey300,
             disabled: .flightGrey400.opacity(0.28),
             onDisabled: .flightGrey400.opacity(0.78),
-            inputOutput: .flightDarkBlue,
-            nominal: .flightDarkGreen,
-            caution: .flightDarkYellow,
-            warning: .flightDarkRed,
-            onCore: .flightGrey800,
-            graphicsRed: .flightGraphicsDarkRed,
-            graphicsYellow: .flightGraphicsDarkYellow,
-            graphicsGreen: .flightGraphicsDarkGreen,
-            graphicsMint: .flightGraphicsDarkMint,
-            graphicsCyan: .flightGraphicsDarkCyan,
-            graphicsBlue: .flightGraphicsDarkBlue,
+            inputOutput: .flightLightBlue,
+            nominal: .flightLightGreen,
+            caution: .flightLightYellow,
+            warning: .flightLightRed,
+            onCore: .flightGrey100,
+            graphicsRed: .flightGraphicsRed,
+            graphicsYellow: .flightGraphicsYellow,
+            graphicsGreen: .flightGraphicsGreen,
+            graphicsMint: .flightGraphicsMint,
+            graphicsCyan: .flightGraphicsCyan,
+            graphicsBlue: .flightGraphicsBlue,
             graphicsIndigo: .flightGraphicsIndigo,
-            graphicsPurple: .flightGraphicsDarkPurple,
-            graphicsPink: .flightGraphicsDarkPink
+            graphicsPurple: .flightGraphicsPurple,
+            graphicsPink: .flightGraphicsPink
         )
     }
 }
