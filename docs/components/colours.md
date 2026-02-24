@@ -27,6 +27,8 @@ You have likely experienced this yourself either in film or just when working wi
 To avoid this, full black has been avoided as a colour within FlightUI, opting for either dark or light greys as required. This also has the added benefit of avoiding black smearing on OLED devices where pixels are turned on and off, while still having a very low power per pixel consumption.
 
 ## 1️⃣ General Colour Usage
+
+![General and core colours showing hex values and usage descriptions for each colour token](../assets/Colors1.png)
 General colours is the name of the group of colours used to distinguish content and content areas within the application.
 
 - **Background** - Default colour for every screen background
@@ -47,6 +49,8 @@ Core colours is the name of the group of colours used to bring context to an app
 - **On Core** - Default colour to display components such as text on top of any of the other core colours
 
 ## 3️⃣ Graphics Colour Usage
+
+![Graphics colours showing all nine colours from red through to pink with their hex values](../assets/Colors2.png)
 Graphics colours is the name of the group of colours that are only to be used for displaying complex data sets such as graphs and diagrams.
 
 These colours should not be used for any other forms of content and are intentionally very limited in their use case. While several colour shades are visually fairly close together, when creating graphs and diagrams designers and developers should be very mindful about minimising the use of similar shades. A line graph with two lines using the Graphics Cyan and Graphics Blue colours for example would not be very clear and distinguishable to users.

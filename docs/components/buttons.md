@@ -2,6 +2,8 @@
 
 FlightUI provides a single, composable button style — `FlightButtonStyle` — that covers every use case through three orthogonal axes: **variant**, **shape**, and an optional **core type**. This keeps the API small and predictable while supporting the full range of actions an aircrew application needs to communicate.
 
+![Button variants showing filled, tonal, outline, text, and core types in enabled, icon, and disabled states](../assets/Buttons.png)
+
 ## Button Hierarchy
 
 Aviation UI follows a strict visual hierarchy. Not all actions are equal, and the button style the developer chooses communicates priority to the user before they even read the label. From highest to lowest visual weight:

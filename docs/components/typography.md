@@ -4,6 +4,8 @@ FlightUI uses a fixed-scale type system defined in `ThemeTypographyData`. Every 
 
 ## Type Scale
 
+![The full FlightUI type scale from Large Title at 34pt bold down to Caption 2 at 14pt regular](../assets/Typography.png)
+
 | Token | Size | Weight | Line Spacing | Use for |
 |-------|------|--------|--------------|---------|
 | `largeTitle` | 34pt | Bold | +7 | Screen titles, major headings |

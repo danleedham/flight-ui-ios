@@ -2,6 +2,8 @@
 
 FlightUI provides two input components — `InputField` and `MenuField` — along with an unbound variant for dynamic option lists. Both support the same alerting state system used throughout the library, the same label conventions, and the same theming.
 
+![Input field variants showing general, advisory, state, label, and managed input types](../assets/Inputs.png)
+
 ## Alerting States
 
 Every input field has an `InputAlertingState` that drives its visual appearance. This is not just validation feedback — it communicates the **nature** of the field to the pilot at a glance, before they interact with it.
