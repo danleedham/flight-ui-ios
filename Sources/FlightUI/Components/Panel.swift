@@ -62,7 +62,7 @@ public struct Panel<Content: View, Subtitle: View>: View {
     }
 
     private var panelView: some View {
-        VStack {
+        VStack(spacing: 0) {
             panelHeaderView
 
             if showContent {
@@ -110,7 +110,8 @@ public struct Panel<Content: View, Subtitle: View>: View {
 
     private func panelTitleTextView(_ title: String) -> some View {
         Text(title)
-            .padding()
+            .padding(.horizontal, theme.spacing.grid2x)
+            .padding(.vertical, theme.spacing.grid2x)
             .font(typography ?? Font.title2)
             .foregroundColor(theme.color.surfaceLow)
     }
@@ -126,9 +127,6 @@ public struct Panel<Content: View, Subtitle: View>: View {
 
     private var panelContentView: some View {
         content()
-            // -12.0 is a magic number, text pixel alignment is slightly off; goal is
-            // to have the content "hug" the Panel and defer padding to component consumer
-            .padding(.top, title == nil ? -theme.spacing.grid1x / 2.0 : -12.0)
     }
 
     private var showContent: Bool {
