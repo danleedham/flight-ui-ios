@@ -170,54 +170,28 @@ extension CoordinateField {
     // MARK: Segment Alerting States
 
     var latDDState: InputAlertingState {
-        guard !latDecimalDegreesText.isEmpty, let val = Double(latDecimalDegreesText) else { return alertingState }
         let limit: ClosedRange<Double> = format == .signedDecimalDegrees ? -90...90 : 0...90
-        return limit.contains(val) ? alertingState : .warning
+        return segmentState(text: latDecimalDegreesText, parse: Double.init, range: limit)
     }
 
     var lonDDState: InputAlertingState {
-        guard !lonDecimalDegreesText.isEmpty, let val = Double(lonDecimalDegreesText) else { return alertingState }
         let limit: ClosedRange<Double> = format == .signedDecimalDegrees ? -180...180 : 0...180
-        return limit.contains(val) ? alertingState : .warning
+        return segmentState(text: lonDecimalDegreesText, parse: Double.init, range: limit)
     }
 
-    var latDegreesState: InputAlertingState {
-        guard !latDegreesText.isEmpty, let val = Int(latDegreesText) else { return alertingState }
-        return (val >= 0 && val <= 90) ? alertingState : .warning
-    }
+    var latDegreesState: InputAlertingState { segmentState(text: latDegreesText, parse: Int.init, range: 0...90) }
+    var lonDegreesState: InputAlertingState { segmentState(text: lonDegreesText, parse: Int.init, range: 0...180) }
+    var latMinDecState: InputAlertingState  { segmentState(text: latMinutesText, parse: Double.init, range: 0.0..<60.0) }
+    var lonMinDecState: InputAlertingState  { segmentState(text: lonMinutesText, parse: Double.init, range: 0.0..<60.0) }
+    var latMinIntState: InputAlertingState  { segmentState(text: latMinutesText, parse: Int.init, range: 0..<60) }
+    var lonMinIntState: InputAlertingState  { segmentState(text: lonMinutesText, parse: Int.init, range: 0..<60) }
+    var latSecondsState: InputAlertingState { segmentState(text: latSecondsText, parse: Double.init, range: 0.0..<60.0) }
+    var lonSecondsState: InputAlertingState { segmentState(text: lonSecondsText, parse: Double.init, range: 0.0..<60.0) }
 
-    var lonDegreesState: InputAlertingState {
-        guard !lonDegreesText.isEmpty, let val = Int(lonDegreesText) else { return alertingState }
-        return (val >= 0 && val <= 180) ? alertingState : .warning
-    }
-
-    var latMinDecState: InputAlertingState {
-        guard !latMinutesText.isEmpty, let val = Double(latMinutesText) else { return alertingState }
-        return (val >= 0 && val < 60) ? alertingState : .warning
-    }
-
-    var lonMinDecState: InputAlertingState {
-        guard !lonMinutesText.isEmpty, let val = Double(lonMinutesText) else { return alertingState }
-        return (val >= 0 && val < 60) ? alertingState : .warning
-    }
-
-    var latMinIntState: InputAlertingState {
-        guard !latMinutesText.isEmpty, let val = Int(latMinutesText) else { return alertingState }
-        return (val >= 0 && val < 60) ? alertingState : .warning
-    }
-
-    var lonMinIntState: InputAlertingState {
-        guard !lonMinutesText.isEmpty, let val = Int(lonMinutesText) else { return alertingState }
-        return (val >= 0 && val < 60) ? alertingState : .warning
-    }
-
-    var latSecondsState: InputAlertingState {
-        guard !latSecondsText.isEmpty, let val = Double(latSecondsText) else { return alertingState }
-        return (val >= 0 && val < 60) ? alertingState : .warning
-    }
-
-    var lonSecondsState: InputAlertingState {
-        guard !lonSecondsText.isEmpty, let val = Double(lonSecondsText) else { return alertingState }
-        return (val >= 0 && val < 60) ? alertingState : .warning
+    private func segmentState<T: Comparable, R: RangeExpression>(
+        text: String, parse: (String) -> T?, range: R
+    ) -> InputAlertingState where R.Bound == T {
+        guard !text.isEmpty, let val = parse(text) else { return alertingState }
+        return range.contains(val) ? alertingState : .warning
     }
 }
