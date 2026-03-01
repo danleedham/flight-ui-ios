@@ -380,24 +380,20 @@ extension CoordinateField {
 
     // MARK: - Cardinal Controls
 
+    @ViewBuilder
     func cardinalLat() -> some View {
-        Group {
-            switch config.cardinalStyle {
-            case .button:  CardinalButton(selection: $latDirection, highlightColor: config.cardinalColor)
-            case .segment: CardinalSegmentControl(selection: $latDirection, highlightColor: config.cardinalColor)
-            }
+        switch config.cardinalStyle {
+        case .button:  CardinalButton(selection: $latDirection, highlightColor: config.cardinalColor)
+        case .segment: CardinalSegmentControl(selection: $latDirection, highlightColor: config.cardinalColor)
         }
-        .id("cardinal-lat")
     }
 
+    @ViewBuilder
     func cardinalLon() -> some View {
-        Group {
-            switch config.cardinalStyle {
-            case .button:  CardinalButton(selection: $lonDirection, highlightColor: config.cardinalColor)
-            case .segment: CardinalSegmentControl(selection: $lonDirection, highlightColor: config.cardinalColor)
-            }
+        switch config.cardinalStyle {
+        case .button:  CardinalButton(selection: $lonDirection, highlightColor: config.cardinalColor)
+        case .segment: CardinalSegmentControl(selection: $lonDirection, highlightColor: config.cardinalColor)
         }
-        .id("cardinal-lon")
     }
 
     // MARK: - Helpers
