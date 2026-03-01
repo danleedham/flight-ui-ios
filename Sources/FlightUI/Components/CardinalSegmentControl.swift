@@ -33,7 +33,7 @@ where Direction: CaseIterable & Hashable & RawRepresentable & Sendable,
                 .disabled(!isEnabled)
             }
         }
-        .background(theme.color.surfaceHigh)
+        .background(theme.color.surfaceLow)
         .cornerRadius(theme.radius.medium)
     }
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import AviationMaths
 
 // MARK: - Latitude Field
 

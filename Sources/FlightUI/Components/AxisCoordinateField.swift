@@ -1,4 +1,5 @@
 import SwiftUI
+import AviationMaths
 
 // MARK: - Axis Coordinate Field (Internal Generic)
 

@@ -6,7 +6,14 @@ Segmented input fields for geographic position entry. Supports four formats, bin
 
 ## Requirements
 
-FlightUI depends on [AviationMaths](https://github.com/danleedham/AviationMaths). Host apps that bind to `Latitude`, `Longitude`, or `Position2D` in their own code must also add AviationMaths as an explicit package dependency. SwiftPM deduplicates packages automatically — using the same URL/version causes no type conflicts and no binary duplication.
+FlightUI depends on [AviationMaths](https://github.com/danleedham/AviationMaths). Host apps that bind to `Latitude`, `Longitude`, or `Position2D` in their own code must also add AviationMaths as an explicit package dependency:
+
+```swift
+// Package.swift
+.package(url: "https://github.com/danleedham/AviationMaths", from: "1.0.0")
+```
+
+SwiftPM deduplicates packages automatically — declaring the same URL causes no type conflicts and no binary duplication.
 
 ## Components
 
@@ -54,6 +61,18 @@ The built-in picker handles all format switching — do not add a second externa
 On iPad (`.regular` width) all four formats place lat and lon on a single row. On iPhone they stack with lat above lon.
 
 When embedded in a SwiftUI `Form`, the component automatically applies `.listRowBackground(Color.clear)` so only the card background shows. No `.listRowInsets` override is needed.
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `position` | `Binding<Position2D?>` | required | Receives valid value or `nil` |
+| `format` | `Binding<CoordinateFormat>` | required | Current format; driven by built-in picker |
+| `topLabel` | `String?` | `nil` | Label above the card |
+| `topLabelSpacer` | `Bool` | `false` | Invisible spacer for alignment in grids |
+| `bottomLabelConfig` | `BottomLabelConfig` | hidden | Label below the card |
+| `alertingState` | `InputAlertingState` | `.default` | Visual state for all segments |
+| `config` | `CoordinateFieldConfig` | `.standard` | Theme overrides |
 
 ---
 
@@ -157,7 +176,7 @@ CoordinateField(
     config: CoordinateFieldConfig(
         fontColor: theme.color.nominal,
         backgroundColor: theme.color.surfaceLow,
-        cardinalStyle: .segment,
+        cardinalStyle: .button,   // override away from .segment default
         secondsPrecision: 2,
         cardinalColor: .green
     )
