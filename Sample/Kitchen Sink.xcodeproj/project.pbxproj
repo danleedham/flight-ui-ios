@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		556931492AC713FD00259236 /* Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556931482AC713FD00259236 /* Cards.swift */; };
+		D3A7B1C12F52000000ABCDE0 /* Coordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A7B1C02F52000000ABCDE0 /* Coordinates.swift */; };
 		55B64F3B2AC4C01C00AC21F5 /* FlightUI in Frameworks */ = {isa = PBXBuildFile; productRef = 55B64F3A2AC4C01C00AC21F5 /* FlightUI */; };
 		8317AEB52F2D0A5800688532 /* FlightUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8317AEB42F2D0A5800688532 /* FlightUI */; };
 		831FE8552F2D0AA900F7B652 /* FlightUI in Frameworks */ = {isa = PBXBuildFile; productRef = 831FE8542F2D0AA900F7B652 /* FlightUI */; };
@@ -17,6 +18,7 @@
 		838E7E2E2987FBF3000F691D /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838E7E2D2987FBF3000F691D /* Buttons.swift */; };
 		83C93DC82986C53C00A911A9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83C93DC72986C53C00A911A9 /* Assets.xcassets */; };
 		83C93DCB2986C53C00A911A9 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83C93DCA2986C53C00A911A9 /* Preview Assets.xcassets */; };
+		83D4045D2F52E32400B7E081 /* AviationMaths in Frameworks */ = {isa = PBXBuildFile; productRef = 83D4045C2F52E32400B7E081 /* AviationMaths */; };
 		83F3071E2F12ED5E0010D75C /* FlightUI in Frameworks */ = {isa = PBXBuildFile; productRef = 83F3071D2F12ED5E0010D75C /* FlightUI */; };
 		AA3C83AF2A3CB5B100A3F40B /* Inputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C83AE2A3CB5B100A3F40B /* Inputs.swift */; };
 		AA3C83B12A3CB78800A3F40B /* Inputs+ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3C83B02A3CB78800A3F40B /* Inputs+ViewModel.swift */; };
@@ -41,6 +43,7 @@
 
 /* Begin PBXFileReference section */
 		556931482AC713FD00259236 /* Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cards.swift; sourceTree = "<group>"; };
+		D3A7B1C02F52000000ABCDE0 /* Coordinates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinates.swift; sourceTree = "<group>"; };
 		837FC6CF2986D0F60076C720 /* Colours.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colours.swift; sourceTree = "<group>"; };
 		837FC6D32986D1900076C720 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		838E7E2A2987D873000F691D /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
@@ -69,6 +72,7 @@
 				83F3071E2F12ED5E0010D75C /* FlightUI in Frameworks */,
 				55B64F3B2AC4C01C00AC21F5 /* FlightUI in Frameworks */,
 				8317AEB52F2D0A5800688532 /* FlightUI in Frameworks */,
+				83D4045D2F52E32400B7E081 /* AviationMaths in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +175,7 @@
 			children = (
 				838E7E2D2987FBF3000F691D /* Buttons.swift */,
 				556931482AC713FD00259236 /* Cards.swift */,
+				D3A7B1C02F52000000ABCDE0 /* Coordinates.swift */,
 				AA3C83AE2A3CB5B100A3F40B /* Inputs.swift */,
 				AA3C83B02A3CB78800A3F40B /* Inputs+ViewModel.swift */,
 			);
@@ -215,6 +220,7 @@
 				83F3071D2F12ED5E0010D75C /* FlightUI */,
 				8317AEB42F2D0A5800688532 /* FlightUI */,
 				831FE8542F2D0AA900F7B652 /* FlightUI */,
+				83D4045C2F52E32400B7E081 /* AviationMaths */,
 			);
 			productName = "Kitchen Sink";
 			productReference = 83C93DC02986C53A00A911A9 /* Kitchen Sink.app */;
@@ -268,6 +274,7 @@
 			mainGroup = 83C93DB72986C53A00A911A9;
 			packageReferences = (
 				831FE8532F2D0AA900F7B652 /* XCLocalSwiftPackageReference "../../FlightUI" */,
+				83D4045B2F52E32400B7E081 /* XCLocalSwiftPackageReference "../../../danleedham/AviationMaths" */,
 			);
 			productRefGroup = 83C93DC12986C53A00A911A9 /* Products */;
 			projectDirPath = "";
@@ -313,6 +320,7 @@
 				837FC6D02986D0F60076C720 /* Colours.swift in Sources */,
 				AA4832C22A8E1DCD004B5F45 /* HeadingView.swift in Sources */,
 				556931492AC713FD00259236 /* Cards.swift in Sources */,
+				D3A7B1C12F52000000ABCDE0 /* Coordinates.swift in Sources */,
 				838E7E2B2987D873000F691D /* String+Extensions.swift in Sources */,
 				FB10BD822B9F5F08002489AB /* UnitConverterViewModel.swift in Sources */,
 				AA3C83B12A3CB78800A3F40B /* Inputs+ViewModel.swift in Sources */,
@@ -620,6 +628,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../FlightUI;
 		};
+		83D4045B2F52E32400B7E081 /* XCLocalSwiftPackageReference "../../../danleedham/AviationMaths" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../danleedham/AviationMaths;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -634,6 +646,10 @@
 		831FE8542F2D0AA900F7B652 /* FlightUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FlightUI;
+		};
+		83D4045C2F52E32400B7E081 /* AviationMaths */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AviationMaths;
 		};
 		83F3071D2F12ED5E0010D75C /* FlightUI */ = {
 			isa = XCSwiftPackageProductDependency;

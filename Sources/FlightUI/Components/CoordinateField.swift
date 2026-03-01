@@ -1,0 +1,396 @@
+import SwiftUI
+
+// MARK: - Coordinate Field
+
+/// A composite input field for entering a full geographic position (latitude + longitude).
+///
+/// Renders both axes inside a unified card, with a shared format picker and a live
+/// cross-format preview that updates as the user types. On iPad (`.regular` width),
+/// the ±DD and DD formats place both axes on a single row.
+///
+/// Smart Paste: tapping the clipboard button parses a signed-decimal coordinate string
+/// from the clipboard and populates all segments automatically.
+///
+/// Example:
+/// ```swift
+/// @State var position: Position2D? = nil
+/// @State var format: CoordinateFormat = .ddm
+///
+/// CoordinateField(position: $position, format: $format, topLabel: "Position")
+/// ```
+///
+public struct CoordinateField: View {
+    @Environment(\.theme) var theme
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+
+    @Binding var position: Position2D?
+    @Binding var format: CoordinateFormat
+
+    let topLabel: String?
+    let topLabelSpacer: Bool
+    let bottomLabelConfig: BottomLabelConfig
+    let alertingState: InputAlertingState
+    let config: CoordinateFieldConfig
+
+    // Internal validated values — set by segment validation, read for assembly
+    @State var latitude: Latitude?
+    @State var longitude: Longitude?
+
+    // Segment text state — latitude
+    @State var latDecimalDegreesText: String = ""
+    @State var latDegreesText: String = ""
+    @State var latMinutesText: String = ""
+    @State var latSecondsText: String = ""
+    @State var latDirection: LatitudeDirection = .north
+
+    // Segment text state — longitude
+    @State var lonDecimalDegreesText: String = ""
+    @State var lonDegreesText: String = ""
+    @State var lonMinutesText: String = ""
+    @State var lonSecondsText: String = ""
+    @State var lonDirection: LongitudeDirection = .east
+
+    // Column-alignment state (iPhone stacked DDM/DMS card)
+    @State var cardDegreesWidth: CGFloat = 0
+
+    public init(
+        position: Binding<Position2D?>,
+        format: Binding<CoordinateFormat>,
+        topLabel: String? = nil,
+        topLabelSpacer: Bool = false,
+        bottomLabelConfig: BottomLabelConfig = .init(isVisible: false),
+        alertingState: InputAlertingState = .default,
+        config: CoordinateFieldConfig = .standard
+    ) {
+        self._position = position
+        self._format = format
+        self.topLabel = topLabel
+        self.topLabelSpacer = topLabelSpacer
+        self.bottomLabelConfig = bottomLabelConfig
+        self.alertingState = alertingState
+        self.config = config
+    }
+
+    public var body: some View {
+        VStack(alignment: .leading, spacing: theme.spacing.grid1x) {
+            buildTopLabel()
+            buildHeader()
+            buildCard()
+            buildPreview()
+            BottomLabel(bottomLabelConfig)
+        }
+        .onAppear { decomposePosition() }
+        .onChange(of: format) { _, _ in populateSegments() }
+        .onChange(of: latitude) { _, _ in assemblePosition() }
+        .onChange(of: longitude) { _, _ in assemblePosition() }
+        .onChange(of: latDecimalDegreesText) { _, _ in validateCurrentFormat() }
+        .onChange(of: latDegreesText) { _, _ in validateCurrentFormat() }
+        .onChange(of: latMinutesText) { _, _ in validateCurrentFormat() }
+        .onChange(of: latSecondsText) { _, _ in validateCurrentFormat() }
+        .onChange(of: latDirection) { _, _ in validateCurrentFormat() }
+        .onChange(of: lonDecimalDegreesText) { _, _ in validateCurrentFormat() }
+        .onChange(of: lonDegreesText) { _, _ in validateCurrentFormat() }
+        .onChange(of: lonMinutesText) { _, _ in validateCurrentFormat() }
+        .onChange(of: lonSecondsText) { _, _ in validateCurrentFormat() }
+        .onChange(of: lonDirection) { _, _ in validateCurrentFormat() }
+    }
+}
+
+// MARK: - Layout
+
+extension CoordinateField {
+
+    @ViewBuilder
+    func buildTopLabel() -> some View {
+        if let top = topLabel {
+            Text(top)
+                .foregroundColor(theme.color.primary)
+                .fontStyle(theme.typography.subhead)
+        } else if topLabelSpacer {
+            Text("-")
+                .foregroundColor(theme.color.surfaceHigh.opacity(0))
+                .fontStyle(theme.typography.subhead)
+        }
+    }
+
+    func buildHeader() -> some View {
+        HStack(spacing: theme.spacing.grid1x) {
+            Picker("Format", selection: $format) {
+                Text("±DD").tag(CoordinateFormat.signedDecimalDegrees)
+                Text("DD").tag(CoordinateFormat.decimalDegrees)
+                Text("DDM").tag(CoordinateFormat.ddm)
+                Text("DMS").tag(CoordinateFormat.dms)
+            }
+            .pickerStyle(.segmented)
+            PasteButton(payloadType: String.self) { strings in
+                if let text = strings.first { parseCoordinateString(text) }
+            }
+            .labelStyle(.iconOnly)
+            .tint(theme.color.primary)
+        }
+    }
+
+    func buildCard() -> some View {
+        VStack(spacing: 0) {
+            if horizontalSizeClass == .regular {
+                switch format {
+                case .signedDecimalDegrees, .decimalDegrees: buildCombinedDDRow()
+                case .ddm:                                   buildCombinedDDMRow()
+                case .dms:                                   buildCombinedDMSRow()
+                }
+            } else {
+                switch format {
+                case .signedDecimalDegrees, .decimalDegrees:
+                    buildLatRow()
+                    cardSeparator()
+                    buildLonRow()
+                case .ddm: buildAlignedDDMCard()
+                case .dms: buildAlignedDMSCard()
+                }
+            }
+        }
+        .background(theme.color.surfaceHigh)
+        .cornerRadius(theme.radius.medium)
+    }
+
+    func cardSeparator() -> some View {
+        theme.color.secondary.opacity(0.2).frame(height: 1)
+    }
+
+    func buildCombinedDDRow() -> some View {
+        HStack(spacing: theme.spacing.grid2x) {
+            HStack(spacing: theme.spacing.grid0_5x) {
+                axisLabel("Lat")
+                buildLatSegmentsDD()
+            }
+            HStack(spacing: theme.spacing.grid0_5x) {
+                axisLabel("Lon")
+                buildLonSegmentsDD()
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(theme.spacing.grid2x)
+    }
+
+    func buildCombinedDDMRow() -> some View {
+        HStack(spacing: theme.spacing.grid2x) {
+            HStack(spacing: theme.spacing.grid0_5x) {
+                axisLabel("Lat")
+                buildLatSegmentsDDM()
+            }
+            HStack(spacing: theme.spacing.grid0_5x) {
+                axisLabel("Lon")
+                buildLonSegmentsDDM()
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(theme.spacing.grid2x)
+    }
+
+    func buildCombinedDMSRow() -> some View {
+        HStack(spacing: theme.spacing.grid2x) {
+            HStack(spacing: theme.spacing.grid0_5x) {
+                axisLabel("Lat")
+                buildLatSegmentsDMS()
+            }
+            HStack(spacing: theme.spacing.grid0_5x) {
+                axisLabel("Lon")
+                buildLonSegmentsDMS()
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(theme.spacing.grid2x)
+    }
+
+    func buildLatRow() -> some View {
+        HStack(spacing: theme.spacing.grid0_5x) {
+            axisLabel("Lat")
+            buildLatSegments()
+            Spacer(minLength: 0)
+        }
+        .padding(theme.spacing.grid2x)
+    }
+
+    func buildLonRow() -> some View {
+        HStack(spacing: theme.spacing.grid0_5x) {
+            axisLabel("Lon")
+            buildLonSegments()
+            Spacer(minLength: 0)
+        }
+        .padding(theme.spacing.grid2x)
+    }
+
+    func axisLabel(_ text: String) -> some View {
+        Text(text)
+            .foregroundColor(theme.color.primary)
+            .fontStyle(theme.typography.bodyBold)
+            .frame(minWidth: 28, alignment: .leading)
+    }
+
+    @ViewBuilder
+    func buildLatSegments() -> some View {
+        switch format {
+        case .signedDecimalDegrees, .decimalDegrees: buildLatSegmentsDD()
+        case .ddm:                                   buildLatSegmentsDDM()
+        case .dms:                                   buildLatSegmentsDMS()
+        }
+    }
+
+    @ViewBuilder
+    func buildLatSegmentsDD() -> some View {
+        if format == .decimalDegrees {
+            CoordinateSegmentField($latDecimalDegreesText, placeholder: "0.00000", suffix: "°",
+                                   filter: .doubleOnly, maxChar: 8,
+                                   state: latDDState, config: segmentInputConfig)
+            cardinalLat()
+        } else {
+            InputField(text: $latDecimalDegreesText, placeholder: "±0.00000",
+                       filter: .custom("[^0-9.-]"), maxCharacterCount: 9)
+                .textFieldStyle(InputFieldStyle(latDDState, config: segmentInputConfig))
+            delimiterText("°")
+        }
+    }
+
+    func buildLatSegmentsDDM() -> some View {
+        HStack(spacing: theme.spacing.grid0_5x) {
+            CoordinateSegmentField($latDegreesText, placeholder: "00", suffix: "°",
+                                   filter: .integerOnly, maxChar: 2,
+                                   state: latDegreesState, config: segmentInputConfig)
+            CoordinateSegmentField($latMinutesText, placeholder: "00.000", suffix: "'",
+                                   filter: .doubleOnly, maxChar: 7,
+                                   state: latMinDecState, config: segmentInputConfig)
+            cardinalLat()
+        }
+    }
+
+    func buildLatSegmentsDMS() -> some View {
+        HStack(spacing: theme.spacing.grid0_5x) {
+            CoordinateSegmentField($latDegreesText, placeholder: "00", suffix: "°",
+                                   filter: .integerOnly, maxChar: 2,
+                                   state: latDegreesState, config: segmentInputConfig)
+            CoordinateSegmentField($latMinutesText, placeholder: "00", suffix: "'",
+                                   filter: .integerOnly, maxChar: 2,
+                                   state: latMinIntState, config: segmentInputConfig)
+            CoordinateSegmentField($latSecondsText, placeholder: latSecondsPlaceholder, suffix: "\"",
+                                   filter: .doubleOnly, maxChar: latSecondsMaxChar,
+                                   state: latSecondsState, config: segmentInputConfig)
+            cardinalLat()
+        }
+    }
+
+    @ViewBuilder
+    func buildLonSegments() -> some View {
+        switch format {
+        case .signedDecimalDegrees, .decimalDegrees: buildLonSegmentsDD()
+        case .ddm:                                   buildLonSegmentsDDM()
+        case .dms:                                   buildLonSegmentsDMS()
+        }
+    }
+
+    @ViewBuilder
+    func buildLonSegmentsDD() -> some View {
+        if format == .decimalDegrees {
+            CoordinateSegmentField($lonDecimalDegreesText, placeholder: "0.00000", suffix: "°",
+                                   filter: .doubleOnly, maxChar: 9,
+                                   state: lonDDState, config: segmentInputConfig)
+            cardinalLon()
+        } else {
+            InputField(text: $lonDecimalDegreesText, placeholder: "±0.00000",
+                       filter: .custom("[^0-9.-]"), maxCharacterCount: 10)
+                .textFieldStyle(InputFieldStyle(lonDDState, config: segmentInputConfig))
+            delimiterText("°")
+        }
+    }
+
+    func buildLonSegmentsDDM() -> some View {
+        HStack(spacing: theme.spacing.grid0_5x) {
+            CoordinateSegmentField($lonDegreesText, placeholder: "000", suffix: "°",
+                                   filter: .integerOnly, maxChar: 3,
+                                   state: lonDegreesState, config: segmentInputConfig)
+            CoordinateSegmentField($lonMinutesText, placeholder: "00.000", suffix: "'",
+                                   filter: .doubleOnly, maxChar: 7,
+                                   state: lonMinDecState, config: segmentInputConfig)
+            cardinalLon()
+        }
+    }
+
+    func buildLonSegmentsDMS() -> some View {
+        HStack(spacing: theme.spacing.grid0_5x) {
+            CoordinateSegmentField($lonDegreesText, placeholder: "000", suffix: "°",
+                                   filter: .integerOnly, maxChar: 3,
+                                   state: lonDegreesState, config: segmentInputConfig)
+            CoordinateSegmentField($lonMinutesText, placeholder: "00", suffix: "'",
+                                   filter: .integerOnly, maxChar: 2,
+                                   state: lonMinIntState, config: segmentInputConfig)
+            CoordinateSegmentField($lonSecondsText, placeholder: lonSecondsPlaceholder, suffix: "\"",
+                                   filter: .doubleOnly, maxChar: lonSecondsMaxChar,
+                                   state: lonSecondsState, config: segmentInputConfig)
+            cardinalLon()
+        }
+    }
+
+    // MARK: - Cardinal Controls
+
+    @ViewBuilder
+    func cardinalLat() -> some View {
+        switch config.cardinalStyle {
+        case .button:  CardinalButton(selection: $latDirection, highlightColor: config.cardinalColor)
+        case .segment: CardinalSegmentControl(selection: $latDirection, highlightColor: config.cardinalColor)
+        }
+    }
+
+    @ViewBuilder
+    func cardinalLon() -> some View {
+        switch config.cardinalStyle {
+        case .button:  CardinalButton(selection: $lonDirection, highlightColor: config.cardinalColor)
+        case .segment: CardinalSegmentControl(selection: $lonDirection, highlightColor: config.cardinalColor)
+        }
+    }
+
+    // MARK: - Helpers
+
+    func delimiterText(_ symbol: String) -> some View {
+        Text(symbol).foregroundColor(theme.color.secondary).fontStyle(theme.typography.body)
+    }
+
+    var latSecondsPlaceholder: String {
+        config.secondsPrecision == 0 ? "00" : "00." + String(repeating: "0", count: config.secondsPrecision)
+    }
+
+    var latSecondsMaxChar: Int {
+        config.secondsPrecision == 0 ? 2 : 2 + 1 + config.secondsPrecision
+    }
+
+    var lonSecondsPlaceholder: String { latSecondsPlaceholder }
+    var lonSecondsMaxChar: Int { latSecondsMaxChar }
+
+    // MARK: - Preview
+
+    @ViewBuilder
+    func buildPreview() -> some View {
+        if let pos = position {
+            VStack(alignment: .leading, spacing: theme.spacing.grid1x) {
+                previewRow("±DD", signedDDString(pos))
+                previewRow("DD", decimalDDString(pos))
+                previewRow("DDM", ddmString(pos))
+                previewRow("DMS", dmsString(pos))
+            }
+            .padding(theme.spacing.grid2x)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(theme.color.surfaceHigh.opacity(0.6))
+            .cornerRadius(theme.radius.medium)
+        }
+    }
+
+    func previewRow(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: theme.spacing.grid1x) {
+            Text(label)
+                .foregroundColor(theme.color.secondary)
+                .fontStyle(theme.typography.caption1)
+                .frame(minWidth: 36, alignment: .leading)
+            Text(value)
+                .foregroundColor(theme.color.inputOutput)
+                .fontStyle(theme.typography.caption1)
+        }
+    }
+}

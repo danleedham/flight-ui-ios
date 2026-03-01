@@ -9,10 +9,15 @@ let package = Package(
             name: "FlightUI",
             targets: ["FlightUI"])
     ],
-    dependencies: [],
+    dependencies: [
+        .package(path: "../../danleedham/AviationMaths")
+    ],
     targets: [
         .target(
             name: "FlightUI",
+            dependencies: [
+                .product(name: "AviationMaths", package: "AviationMaths")
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency")
             ]
