@@ -2,16 +2,11 @@
 
 Segmented input fields for geographic position entry. Supports four formats, binds directly to [AviationMaths](https://github.com/danleedham/AviationMaths) types, and applies per-segment out-of-range validation following ISO 6709.
 
+![Coordinate Entry components](../assets/Coordinates.png)
+
 ## Requirements
 
-Add AviationMaths as a package dependency alongside FlightUI:
-
-```swift
-// Package.swift
-dependencies: [
-    .package(url: "https://github.com/danleedham/AviationMaths", from: "x.x.x")
-]
-```
+FlightUI re-exports [AviationMaths](https://github.com/danleedham/AviationMaths) via `@_exported import`, so the coordinate types (`Latitude`, `Longitude`, `Position2D`, etc.) are available to any target that imports FlightUI — **no separate AviationMaths dependency declaration is needed**.
 
 ## Components
 
@@ -89,7 +84,7 @@ LatitudeField(
 
 ## LongitudeField
 
-Identical to `LatitudeField` with `Longitude?` binding and E/W hemisphere toggle. Degrees range 0–180.
+Identical to `LatitudeField` with `Longitude?` binding and E/W hemisphere toggle. Degrees range 0–180. Note: `onSegmentFilled` is not available on `LongitudeField`.
 
 ```swift
 LongitudeField(
