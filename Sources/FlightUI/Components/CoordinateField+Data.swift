@@ -120,24 +120,6 @@ extension CoordinateField {
         latSecondsText = "";        lonSecondsText = ""
     }
 
-    // MARK: Smart Paste
-
-    func parseCoordinateString(_ text: String) {
-        let pattern = #"[-+]?\d+\.?\d*"#
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return }
-        let matches = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
-        guard matches.count >= 2 else { return }
-        let nums = matches.prefix(2).compactMap { match -> Double? in
-            guard let range = Range(match.range, in: text) else { return nil }
-            return Double(String(text[range]))
-        }
-        guard nums.count == 2,
-              abs(nums[0]) <= 90, abs(nums[1]) <= 180,
-              Latitude.isValid(decimalDegrees: nums[0]),
-              Longitude.isValid(decimalDegrees: nums[1]) else { return }
-        populateSegments(from: Latitude(decimalDegrees: nums[0]), lon: Longitude(decimalDegrees: nums[1]))
-    }
-
     // MARK: Preview Strings
 
     func signedDDString(_ pos: Position2D) -> String {

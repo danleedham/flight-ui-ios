@@ -4,12 +4,15 @@ import SwiftUI
 
 /// A composite input field for entering a full geographic position (latitude + longitude).
 ///
-/// Renders both axes inside a unified card, with a shared format picker and a live
-/// cross-format preview that updates as the user types. On iPad (`.regular` width),
+/// Renders both axes inside a unified card, with a built-in format picker (±DD / DD / DDM / DMS)
+/// and a live cross-format preview that updates as the user types. On iPad (`.regular` width),
 /// the ±DD and DD formats place both axes on a single row.
 ///
-/// Smart Paste: tapping the clipboard button parses a signed-decimal coordinate string
-/// from the clipboard and populates all segments automatically.
+/// The `format` binding is still useful for persistence and offset display — the built-in picker
+/// handles switching, so apps should not add a second external picker.
+///
+/// When embedded in a SwiftUI `Form`, the component automatically clears the list row background
+/// so only the card background is visible. No `.listRowInsets` override is needed.
 ///
 /// Example:
 /// ```swift
@@ -69,6 +72,44 @@ public struct CoordinateField: View {
         self.bottomLabelConfig = bottomLabelConfig
         self.alertingState = alertingState
         self.config = config
+
+        // Synchronously populate segments from the initial binding value so the first
+        // render shows filled fields and avoids a nil→non-nil flash on the caller's side.
+        guard let pos = position.wrappedValue else { return }
+        let fmt = format.wrappedValue
+        let secsPrec = config.secondsPrecision
+        self._latitude = State(initialValue: pos.latitude)
+        self._longitude = State(initialValue: pos.longitude)
+        switch fmt {
+        case .signedDecimalDegrees:
+            self._latDecimalDegreesText = State(initialValue: String(format: "%.5f", pos.latitude.decimalDegrees))
+            self._lonDecimalDegreesText = State(initialValue: String(format: "%.5f", pos.longitude.decimalDegrees))
+        case .decimalDegrees:
+            self._latDirection = State(initialValue: pos.latitude.direction)
+            self._latDecimalDegreesText = State(initialValue: String(format: "%.5f", pos.latitude.unsignedDecimalDegrees))
+            self._lonDirection = State(initialValue: pos.longitude.direction)
+            self._lonDecimalDegreesText = State(initialValue: String(format: "%.5f", pos.longitude.unsignedDecimalDegrees))
+        case .ddm:
+            let latDDM = pos.latitude.degreesDecimalMinutes
+            let lonDDM = pos.longitude.degreesDecimalMinutes
+            self._latDirection = State(initialValue: pos.latitude.direction)
+            self._latDegreesText = State(initialValue: String(latDDM.degrees))
+            self._latMinutesText = State(initialValue: String(format: "%.3f", latDDM.minutes))
+            self._lonDirection = State(initialValue: pos.longitude.direction)
+            self._lonDegreesText = State(initialValue: String(lonDDM.degrees))
+            self._lonMinutesText = State(initialValue: String(format: "%.3f", lonDDM.minutes))
+        case .dms:
+            let latDMS = pos.latitude.degreesMinutesSeconds
+            let lonDMS = pos.longitude.degreesMinutesSeconds
+            self._latDirection = State(initialValue: pos.latitude.direction)
+            self._latDegreesText = State(initialValue: String(latDMS.degrees))
+            self._latMinutesText = State(initialValue: String(latDMS.minutes))
+            self._latSecondsText = State(initialValue: String(format: "%.\(secsPrec)f", latDMS.seconds))
+            self._lonDirection = State(initialValue: pos.longitude.direction)
+            self._lonDegreesText = State(initialValue: String(lonDMS.degrees))
+            self._lonMinutesText = State(initialValue: String(lonDMS.minutes))
+            self._lonSecondsText = State(initialValue: String(format: "%.\(secsPrec)f", lonDMS.seconds))
+        }
     }
 
     public var body: some View {
@@ -79,7 +120,7 @@ public struct CoordinateField: View {
             buildPreview()
             BottomLabel(bottomLabelConfig)
         }
-        .onAppear { decomposePosition() }
+        .listRowBackground(Color.clear)
         .onChange(of: format) { _, _ in populateSegments() }
         .onChange(of: latitude) { _, _ in assemblePosition() }
         .onChange(of: longitude) { _, _ in assemblePosition() }
@@ -114,20 +155,13 @@ extension CoordinateField {
     }
 
     func buildHeader() -> some View {
-        HStack(spacing: theme.spacing.grid1x) {
-            Picker("Format", selection: $format) {
-                Text("±DD").tag(CoordinateFormat.signedDecimalDegrees)
-                Text("DD").tag(CoordinateFormat.decimalDegrees)
-                Text("DDM").tag(CoordinateFormat.ddm)
-                Text("DMS").tag(CoordinateFormat.dms)
-            }
-            .pickerStyle(.segmented)
-            PasteButton(payloadType: String.self) { strings in
-                if let text = strings.first { parseCoordinateString(text) }
-            }
-            .labelStyle(.iconOnly)
-            .tint(theme.color.primary)
+        Picker("Format", selection: $format) {
+            Text("±DD").tag(CoordinateFormat.signedDecimalDegrees)
+            Text("DD").tag(CoordinateFormat.decimalDegrees)
+            Text("DDM").tag(CoordinateFormat.ddm)
+            Text("DMS").tag(CoordinateFormat.dms)
         }
+        .pickerStyle(.segmented)
     }
 
     func buildCard() -> some View {

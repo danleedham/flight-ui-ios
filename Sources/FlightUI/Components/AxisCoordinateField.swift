@@ -72,6 +72,30 @@ where Value: AngularCoordinate,
         self.unsignedDDMaxChar = unsignedDDMaxChar
         self.positiveDirection = positiveDirection
         self._direction = State(initialValue: defaultDirection)
+
+        // Synchronously populate segments from the initial binding value so the first
+        // render shows filled fields and avoids a nil→non-nil flash on the caller's side.
+        guard let val = value.wrappedValue else { return }
+        let fmt = format.wrappedValue
+        let secsPrec = config.secondsPrecision
+        switch fmt {
+        case .signedDecimalDegrees:
+            self._decimalDegreesText = State(initialValue: String(format: "%.5f", val.decimalDegrees))
+        case .decimalDegrees:
+            self._direction = State(initialValue: val.direction)
+            self._decimalDegreesText = State(initialValue: String(format: "%.5f", val.unsignedDecimalDegrees))
+        case .ddm:
+            let ddm = val.degreesDecimalMinutes
+            self._direction = State(initialValue: val.direction)
+            self._degreesText = State(initialValue: String(ddm.degrees))
+            self._minutesText = State(initialValue: String(format: "%.3f", ddm.minutes))
+        case .dms:
+            let dms = val.degreesMinutesSeconds
+            self._direction = State(initialValue: val.direction)
+            self._degreesText = State(initialValue: String(dms.degrees))
+            self._minutesText = State(initialValue: String(dms.minutes))
+            self._secondsText = State(initialValue: String(format: "%.\(secsPrec)f", dms.seconds))
+        }
     }
 
     var body: some View {
@@ -80,7 +104,6 @@ where Value: AngularCoordinate,
             buildSegments()
             BottomLabel(bottomLabelConfig)
         }
-        .onAppear { populateFromBinding() }
         .onChange(of: format) { _, _ in populateFromBinding() }
         .onChange(of: direction) { _, _ in validate() }
         .onChange(of: degreesText) { _, _ in validate() }

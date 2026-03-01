@@ -6,7 +6,7 @@ Segmented input fields for geographic position entry. Supports four formats, bin
 
 ## Requirements
 
-FlightUI re-exports [AviationMaths](https://github.com/danleedham/AviationMaths) via `@_exported import`, so the coordinate types (`Latitude`, `Longitude`, `Position2D`, etc.) are available to any target that imports FlightUI — **no separate AviationMaths dependency declaration is needed**.
+FlightUI depends on [AviationMaths](https://github.com/danleedham/AviationMaths). Host apps that bind to `Latitude`, `Longitude`, or `Position2D` in their own code must also add AviationMaths as an explicit package dependency. SwiftPM deduplicates packages automatically — using the same URL/version causes no type conflicts and no binary duplication.
 
 ## Components
 
@@ -14,7 +14,7 @@ FlightUI re-exports [AviationMaths](https://github.com/danleedham/AviationMaths)
 |-----------|---------|-------------|
 | `LatitudeField` | `Latitude?` | Single-axis lat entry |
 | `LongitudeField` | `Longitude?` | Single-axis lon entry |
-| `CoordinateField` | `Position2D?` | Stacked lat + lon with shared format picker and smart paste |
+| `CoordinateField` | `Position2D?` | Stacked lat + lon with built-in format picker and cross-format preview |
 
 ---
 
@@ -35,7 +35,7 @@ MGRS is planned for a future release.
 
 ## CoordinateField
 
-Full position entry with a built-in format picker and clipboard paste button:
+Full position entry with a built-in format picker (±DD / DD / DDM / DMS) and a live cross-format preview:
 
 ```swift
 @State var position: Position2D? = nil
@@ -49,7 +49,11 @@ CoordinateField(
 
 `position` is `nil` until both lat and lon segments are complete and in-range.
 
+The built-in picker handles all format switching — do not add a second external picker. The `format` binding is still useful for persistence (e.g. `@AppStorage`) and reading the current format for offset display.
+
 On iPad (`.regular` width) all four formats place lat and lon on a single row. On iPhone they stack with lat above lon.
+
+When embedded in a SwiftUI `Form`, the component automatically applies `.listRowBackground(Color.clear)` so only the card background shows. No `.listRowInsets` override is needed.
 
 ---
 
@@ -169,7 +173,7 @@ CoordinateField(
 | `backgroundColor` | `Color?` | `nil` | Segment input background |
 | `cornerRadius` | `CGFloat?` | `nil` | Segment corner radius |
 | `borderColor` | `Color?` | `nil` | Segment border colour |
-| `cardinalStyle` | `CardinalInputStyle` | `.button` | Hemisphere selector style |
+| `cardinalStyle` | `CardinalInputStyle` | `.segment` | Hemisphere selector style |
 | `secondsPrecision` | `Int` | `1` | Decimal places for seconds in DMS |
 | `cardinalColor` | `Color?` | `nil` | Highlight colour for the cardinal button/pill. `nil` uses `theme.color.inputOutput` |
 
@@ -185,8 +189,8 @@ Controls how the hemisphere selector (N/S or E/W) is displayed:
 
 ```swift
 public enum CardinalInputStyle: Sendable {
-    case button   // Compact square button — tapping cycles N ↔ S (or E ↔ W). Default.
-    case segment  // Both directions shown side-by-side; the active one is highlighted.
+    case button   // Compact square button — tapping cycles N ↔ S (or E ↔ W).
+    case segment  // Both directions shown side-by-side; the active one is highlighted. Default.
 }
 ```
 

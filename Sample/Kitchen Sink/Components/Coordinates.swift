@@ -33,7 +33,7 @@ struct Coordinates: View {
         VStack(alignment: .leading) {
             HeadingView(
                 title: "CoordinateField",
-                subTitle: "Card layout with format picker, cross-format preview, and smart paste. "
+                subTitle: "Card layout with built-in format picker and cross-format preview. "
                         + "Binds to Position2D? — nil until both axes are valid. "
                         + "On iPad, ±DD and DD formats show both axes on a single row."
             )
@@ -109,11 +109,11 @@ struct Coordinates: View {
             HeadingView(
                 title: "Cardinal Input Styles",
                 subTitle: "The cardinalStyle parameter controls the hemisphere selector. "
-                        + ".button (default) shows a compact cycling button. "
-                        + ".segment shows both options simultaneously as a toggle."
+                        + ".segment (default) shows both options simultaneously as a toggle. "
+                        + ".button shows a compact cycling button."
             )
 
-            Text(".button (default)")
+            Text(".button")
                 .foregroundColor(theme.color.secondary)
                 .fontStyle(theme.typography.caption1)
                 .padding(.top, theme.spacing.grid1x)
@@ -123,7 +123,7 @@ struct Coordinates: View {
                 config: CoordinateFieldConfig(cardinalStyle: .button)
             )
 
-            Text(".segment")
+            Text(".segment (default)")
                 .foregroundColor(theme.color.secondary)
                 .fontStyle(theme.typography.caption1)
                 .padding(.top, theme.spacing.grid1x)

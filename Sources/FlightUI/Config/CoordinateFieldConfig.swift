@@ -35,9 +35,9 @@ public enum CoordinateFormat: String, Sendable, CaseIterable {
 /// - `segment`: Both directions shown side-by-side as a toggle; the active one is highlighted.
 ///
 public enum CardinalInputStyle: Sendable {
-    /// A compact square button that cycles through directions on tap. (Default)
+    /// A compact square button that cycles through directions on tap.
     case button
-    /// Both directions shown simultaneously; the selected one is highlighted.
+    /// Both directions shown simultaneously; the selected one is highlighted. (Default)
     case segment
 }
 
@@ -55,7 +55,7 @@ public struct CoordinateFieldConfig: Sendable {
     public let backgroundColor: Color?
     public let cornerRadius: CGFloat?
     public let borderColor: Color?
-    /// Controls how the hemisphere selector is displayed. Default is `.button`.
+    /// Controls how the hemisphere selector is displayed. Default is `.segment`.
     public let cardinalStyle: CardinalInputStyle
     /// Number of decimal places for seconds in DMS format. Default is `1` (e.g. `44.5"`).
     public let secondsPrecision: Int
@@ -68,7 +68,7 @@ public struct CoordinateFieldConfig: Sendable {
         backgroundColor: Color? = nil,
         cornerRadius: CGFloat? = nil,
         borderColor: Color? = nil,
-        cardinalStyle: CardinalInputStyle = .button,
+        cardinalStyle: CardinalInputStyle = .segment,
         secondsPrecision: Int = 1,
         cardinalColor: Color? = nil
     ) {

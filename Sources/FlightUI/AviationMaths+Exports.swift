@@ -1,5 +1,6 @@
-// Re-export AviationMaths so that consumers of FlightUI gain access to the
-// coordinate types (Latitude, Longitude, Position2D, etc.) that the coordinate
-// entry components bind to, without needing a separate AviationMaths dependency
-// declaration in their own project.
-@_exported import AviationMaths
+// AviationMaths is a direct dependency of FlightUI.
+// Each component file that uses AviationMaths types imports it explicitly.
+// Host apps that bind to Latitude, Longitude, or Position2D should add
+// AviationMaths as their own dependency — SwiftPM deduplicates it automatically,
+// so there is no version conflict when both FlightUI and the host app declare it.
+import AviationMaths
