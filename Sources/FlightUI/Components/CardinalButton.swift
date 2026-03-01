@@ -17,7 +17,7 @@ where Direction: CaseIterable & Hashable & RawRepresentable & Sendable,
     @Environment(\.isEnabled) var isEnabled
 
     @Binding var selection: Direction
-    var highlightColor: Color? = nil
+    var highlightColor: Color?
 
     var body: some View {
         Button {

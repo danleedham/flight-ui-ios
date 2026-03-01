@@ -181,10 +181,10 @@ extension CoordinateField {
 
     var latDegreesState: InputAlertingState { segmentState(text: latDegreesText, parse: Int.init, range: 0...90) }
     var lonDegreesState: InputAlertingState { segmentState(text: lonDegreesText, parse: Int.init, range: 0...180) }
-    var latMinDecState: InputAlertingState  { segmentState(text: latMinutesText, parse: Double.init, range: 0.0..<60.0) }
-    var lonMinDecState: InputAlertingState  { segmentState(text: lonMinutesText, parse: Double.init, range: 0.0..<60.0) }
-    var latMinIntState: InputAlertingState  { segmentState(text: latMinutesText, parse: Int.init, range: 0..<60) }
-    var lonMinIntState: InputAlertingState  { segmentState(text: lonMinutesText, parse: Int.init, range: 0..<60) }
+    var latMinDecState: InputAlertingState { segmentState(text: latMinutesText, parse: Double.init, range: 0.0..<60.0) }
+    var lonMinDecState: InputAlertingState { segmentState(text: lonMinutesText, parse: Double.init, range: 0.0..<60.0) }
+    var latMinIntState: InputAlertingState { segmentState(text: latMinutesText, parse: Int.init, range: 0..<60) }
+    var lonMinIntState: InputAlertingState { segmentState(text: lonMinutesText, parse: Int.init, range: 0..<60) }
     var latSecondsState: InputAlertingState { segmentState(text: latSecondsText, parse: Double.init, range: 0.0..<60.0) }
     var lonSecondsState: InputAlertingState { segmentState(text: lonSecondsText, parse: Double.init, range: 0.0..<60.0) }
 
