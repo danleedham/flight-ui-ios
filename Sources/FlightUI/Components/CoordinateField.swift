@@ -25,7 +25,6 @@ import AviationMaths
 ///
 public struct CoordinateField: View {
     @Environment(\.theme) var theme
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
 
     @Binding var position: Position2D?
     @Binding var format: CoordinateFormat
@@ -167,20 +166,25 @@ extension CoordinateField {
 
     func buildCard() -> some View {
         VStack(spacing: 0) {
-            if horizontalSizeClass == .regular {
-                switch format {
-                case .signedDecimalDegrees, .decimalDegrees: buildCombinedDDRow()
-                case .ddm:                                   buildCombinedDDMRow()
-                case .dms:                                   buildCombinedDMSRow()
+            switch format {
+            case .signedDecimalDegrees, .decimalDegrees:
+                ViewThatFits(in: .horizontal) {
+                    buildCombinedDDRow()
+                    VStack(spacing: 0) {
+                        buildLatRow()
+                        cardSeparator()
+                        buildLonRow()
+                    }
                 }
-            } else {
-                switch format {
-                case .signedDecimalDegrees, .decimalDegrees:
-                    buildLatRow()
-                    cardSeparator()
-                    buildLonRow()
-                case .ddm: buildAlignedDDMCard()
-                case .dms: buildAlignedDMSCard()
+            case .ddm:
+                ViewThatFits(in: .horizontal) {
+                    buildCombinedDDMRow()
+                    buildAlignedDDMCard()
+                }
+            case .dms:
+                ViewThatFits(in: .horizontal) {
+                    buildCombinedDMSRow()
+                    buildAlignedDMSCard()
                 }
             }
         }
@@ -376,20 +380,24 @@ extension CoordinateField {
 
     // MARK: - Cardinal Controls
 
-    @ViewBuilder
     func cardinalLat() -> some View {
-        switch config.cardinalStyle {
-        case .button:  CardinalButton(selection: $latDirection, highlightColor: config.cardinalColor)
-        case .segment: CardinalSegmentControl(selection: $latDirection, highlightColor: config.cardinalColor)
+        Group {
+            switch config.cardinalStyle {
+            case .button:  CardinalButton(selection: $latDirection, highlightColor: config.cardinalColor)
+            case .segment: CardinalSegmentControl(selection: $latDirection, highlightColor: config.cardinalColor)
+            }
         }
+        .id("cardinal-lat")
     }
 
-    @ViewBuilder
     func cardinalLon() -> some View {
-        switch config.cardinalStyle {
-        case .button:  CardinalButton(selection: $lonDirection, highlightColor: config.cardinalColor)
-        case .segment: CardinalSegmentControl(selection: $lonDirection, highlightColor: config.cardinalColor)
+        Group {
+            switch config.cardinalStyle {
+            case .button:  CardinalButton(selection: $lonDirection, highlightColor: config.cardinalColor)
+            case .segment: CardinalSegmentControl(selection: $lonDirection, highlightColor: config.cardinalColor)
+            }
         }
+        .id("cardinal-lon")
     }
 
     // MARK: - Helpers
