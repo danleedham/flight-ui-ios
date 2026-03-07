@@ -246,6 +246,14 @@ The binding only receives a typed value when **all** segments are filled and **a
 
 ---
 
+## Usage with Form / List
+
+All coordinate components work correctly inside SwiftUI `Form` and `List`. However, developers adding **new button-based sub-components** (e.g. custom cardinal selectors) must apply `.buttonStyle(.plain)` to every `Button` — otherwise `Form` / `List` silently expands button tap targets to fill the entire row, causing taps on one button to trigger a different button's action.
+
+The built-in `CardinalButton` and `CardinalSegmentControl` already include this modifier. No action is needed by consumers — this note is for contributors extending the coordinate components.
+
+---
+
 ## Focus Advancement
 
 Auto-advance between segments is **not** implemented by default. Use the `onSegmentFilled` closure on `LatitudeField` to drive your own `@FocusState` logic:

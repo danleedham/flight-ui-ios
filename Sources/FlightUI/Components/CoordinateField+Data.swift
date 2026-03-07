@@ -11,69 +11,72 @@ extension CoordinateField {
                          cornerRadius: config.cornerRadius, borderColor: config.borderColor)
     }
 
-    // MARK: Validation
+    // MARK: Validation & Assembly
 
-    func validateCurrentFormat() {
+    /// Computes the current latitude from segment state without modifying any stored state.
+    func computeLatitude() -> Latitude? {
         switch format {
-        case .signedDecimalDegrees: validateSignedDD()
-        case .decimalDegrees:       validateUnsignedDD()
-        case .ddm:                  validateDDM()
-        case .dms:                  validateDMS()
-        }
-    }
-
-    func validateSignedDD() {
-        latitude = Double(latDecimalDegreesText).flatMap {
-            Latitude.isValid(decimalDegrees: $0) ? Latitude(decimalDegrees: $0) : nil
-        }
-        longitude = Double(lonDecimalDegreesText).flatMap {
-            Longitude.isValid(decimalDegrees: $0) ? Longitude(decimalDegrees: $0) : nil
-        }
-    }
-
-    func validateUnsignedDD() {
-        if let val = Double(latDecimalDegreesText), val >= 0, val <= 90 {
+        case .signedDecimalDegrees:
+            return Double(latDecimalDegreesText).flatMap {
+                Latitude.isValid(decimalDegrees: $0) ? Latitude(decimalDegrees: $0) : nil
+            }
+        case .decimalDegrees:
+            guard let val = Double(latDecimalDegreesText), val >= 0, val <= 90 else { return nil }
             let signed = latDirection == .north ? val : -val
-            latitude = Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
-        } else { latitude = nil }
-        if let val = Double(lonDecimalDegreesText), val >= 0, val <= 180 {
-            let signed = lonDirection == .east ? val : -val
-            longitude = Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
-        } else { longitude = nil }
-    }
-
-    func validateDDM() {
-        if let degs = Int(latDegreesText), let mins = Double(latMinutesText),
-           degs >= 0, degs <= 90, mins >= 0, mins < 60 {
+            return Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
+        case .ddm:
+            guard let degs = Int(latDegreesText), let mins = Double(latMinutesText),
+                  degs >= 0, degs <= 90, mins >= 0, mins < 60 else { return nil }
             let signed = (latDirection == .north ? 1.0 : -1.0) * (Double(degs) + mins / 60.0)
-            latitude = Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
-        } else { latitude = nil }
-        if let degs = Int(lonDegreesText), let mins = Double(lonMinutesText),
-           degs >= 0, degs <= 180, mins >= 0, mins < 60 {
-            let signed = (lonDirection == .east ? 1.0 : -1.0) * (Double(degs) + mins / 60.0)
-            longitude = Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
-        } else { longitude = nil }
-    }
-
-    func validateDMS() {
-        if let degs = Int(latDegreesText), let mins = Int(latMinutesText), let secs = Double(latSecondsText),
-           degs >= 0, degs <= 90, mins >= 0, mins < 60, secs >= 0, secs < 60 {
+            return Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
+        case .dms:
+            guard let degs = Int(latDegreesText), let mins = Int(latMinutesText), let secs = Double(latSecondsText),
+                  degs >= 0, degs <= 90, mins >= 0, mins < 60, secs >= 0, secs < 60 else { return nil }
             let signed = (latDirection == .north ? 1.0 : -1.0) * (Double(degs) + Double(mins) / 60.0 + secs / 3600.0)
-            latitude = Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
-        } else { latitude = nil }
-        if let degs = Int(lonDegreesText), let mins = Int(lonMinutesText), let secs = Double(lonSecondsText),
-           degs >= 0, degs <= 180, mins >= 0, mins < 60, secs >= 0, secs < 60 {
+            return Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
+        }
+    }
+
+    /// Computes the current longitude from segment state without modifying any stored state.
+    func computeLongitude() -> Longitude? {
+        switch format {
+        case .signedDecimalDegrees:
+            return Double(lonDecimalDegreesText).flatMap {
+                Longitude.isValid(decimalDegrees: $0) ? Longitude(decimalDegrees: $0) : nil
+            }
+        case .decimalDegrees:
+            guard let val = Double(lonDecimalDegreesText), val >= 0, val <= 180 else { return nil }
+            let signed = lonDirection == .east ? val : -val
+            return Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
+        case .ddm:
+            guard let degs = Int(lonDegreesText), let mins = Double(lonMinutesText),
+                  degs >= 0, degs <= 180, mins >= 0, mins < 60 else { return nil }
+            let signed = (lonDirection == .east ? 1.0 : -1.0) * (Double(degs) + mins / 60.0)
+            return Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
+        case .dms:
+            guard let degs = Int(lonDegreesText), let mins = Int(lonMinutesText), let secs = Double(lonSecondsText),
+                  degs >= 0, degs <= 180, mins >= 0, mins < 60, secs >= 0, secs < 60 else { return nil }
             let signed = (lonDirection == .east ? 1.0 : -1.0) * (Double(degs) + Double(mins) / 60.0 + secs / 3600.0)
-            longitude = Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
-        } else { longitude = nil }
+            return Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
+        }
     }
 
-    // MARK: Assembly & Population
-
-    func assemblePosition() {
-        guard let lat = latitude, let lon = longitude else { position = nil; return }
-        position = Position2D(latitude: lat, longitude: lon)
+    /// Validates both axes from the current segment state and writes the result to the position binding.
+    /// Called directly from all segment onChange handlers — no intermediate @State involved.
+    /// Only writes when the value actually changes, preventing unnecessary parent re-renders
+    /// that can cause Form/List to re-initialise @State.
+    func assembleFromCurrentState() {
+        guard let lat = computeLatitude(), let lon = computeLongitude() else {
+            if position != nil { position = nil }
+            return
+        }
+        let newPosition = Position2D(latitude: lat, longitude: lon)
+        if position != newPosition {
+            position = newPosition
+        }
     }
+
+    // MARK: Population
 
     func decomposePosition() {
         guard let pos = position else { return }
@@ -86,29 +89,38 @@ extension CoordinateField {
     }
 
     func populateSegments(from lat: Latitude, lon: Longitude) {
+        // Only update direction from the model when magnitude is non-zero.
+        // At exactly 0°, direction is ambiguous — preserve whatever the user has set.
+        let updateLatDir = lat.unsignedDecimalDegrees > 0
+        let updateLonDir = lon.unsignedDecimalDegrees > 0
+
         switch format {
         case .signedDecimalDegrees:
             latDecimalDegreesText = String(format: "%.5f", lat.decimalDegrees)
             lonDecimalDegreesText = String(format: "%.5f", lon.decimalDegrees)
         case .decimalDegrees:
-            latDirection = lat.direction
+            if updateLatDir { latDirection = lat.direction }
             latDecimalDegreesText = String(format: "%.5f", lat.unsignedDecimalDegrees)
-            lonDirection = lon.direction
+            if updateLonDir { lonDirection = lon.direction }
             lonDecimalDegreesText = String(format: "%.5f", lon.unsignedDecimalDegrees)
         case .ddm:
             let latDDM = lat.degreesDecimalMinutes
-            latDirection = lat.direction; latDegreesText = String(latDDM.degrees)
+            if updateLatDir { latDirection = lat.direction }
+            latDegreesText = String(latDDM.degrees)
             latMinutesText = String(format: "%.3f", latDDM.minutes)
             let lonDDM = lon.degreesDecimalMinutes
-            lonDirection = lon.direction; lonDegreesText = String(lonDDM.degrees)
+            if updateLonDir { lonDirection = lon.direction }
+            lonDegreesText = String(lonDDM.degrees)
             lonMinutesText = String(format: "%.3f", lonDDM.minutes)
         case .dms:
             let latDMS = lat.degreesMinutesSeconds
-            latDirection = lat.direction; latDegreesText = String(latDMS.degrees)
+            if updateLatDir { latDirection = lat.direction }
+            latDegreesText = String(latDMS.degrees)
             latMinutesText = String(latDMS.minutes)
             latSecondsText = String(format: "%.\(config.secondsPrecision)f", latDMS.seconds)
             let lonDMS = lon.degreesMinutesSeconds
-            lonDirection = lon.direction; lonDegreesText = String(lonDMS.degrees)
+            if updateLonDir { lonDirection = lon.direction }
+            lonDegreesText = String(lonDMS.degrees)
             lonMinutesText = String(lonDMS.minutes)
             lonSecondsText = String(format: "%.\(config.secondsPrecision)f", lonDMS.seconds)
         }

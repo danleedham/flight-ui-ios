@@ -8,6 +8,11 @@ import SwiftUI
 /// Used internally by `LatitudeField`, `LongitudeField`, and `CoordinateField`
 /// as a compact alternative to a dropdown picker.
 ///
+/// - Important: Uses `.buttonStyle(.plain)` to prevent SwiftUI's `Form` / `List`
+///   from expanding the tap target to fill the entire row. Without this modifier,
+///   multiple buttons in the same row share an enlarged hit region, causing taps
+///   on one cardinal button to fire a different button's action.
+///
 struct CardinalButton<Direction>: View
 where Direction: CaseIterable & Hashable & RawRepresentable & Sendable,
       Direction.RawValue == String,
@@ -31,6 +36,7 @@ where Direction: CaseIterable & Hashable & RawRepresentable & Sendable,
                 .background(backgroundColor)
                 .cornerRadius(theme.radius.medium)
         }
+        .buttonStyle(.plain)
         .disabled(!isEnabled)
     }
 

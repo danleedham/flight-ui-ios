@@ -8,6 +8,11 @@ import SwiftUI
 /// Used by `LatitudeField`, `LongitudeField`, and `CoordinateField`
 /// when `CoordinateFieldConfig.cardinalStyle` is `.segment`.
 ///
+/// - Important: Each `Button` uses `.buttonStyle(.plain)` to prevent SwiftUI's
+///   `Form` / `List` from expanding tap targets to fill the entire row. Without
+///   this modifier, multiple buttons in the same row share an enlarged hit region,
+///   causing taps on one direction button to fire the wrong button's action.
+///
 struct CardinalSegmentControl<Direction>: View
 where Direction: CaseIterable & Hashable & RawRepresentable & Sendable,
       Direction.RawValue == String,
@@ -30,6 +35,7 @@ where Direction: CaseIterable & Hashable & RawRepresentable & Sendable,
                         .cornerRadius(theme.radius.small)
                         .padding(3)
                 }
+                .buttonStyle(.plain)
                 .disabled(!isEnabled)
             }
         }

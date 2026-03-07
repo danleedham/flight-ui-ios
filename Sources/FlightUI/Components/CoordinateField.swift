@@ -35,10 +35,6 @@ public struct CoordinateField: View {
     let alertingState: InputAlertingState
     let config: CoordinateFieldConfig
 
-    // Internal validated values — set by segment validation, read for assembly
-    @State var latitude: Latitude?
-    @State var longitude: Longitude?
-
     // Segment text state — latitude
     @State var latDecimalDegreesText: String = ""
     @State var latDegreesText: String = ""
@@ -51,7 +47,7 @@ public struct CoordinateField: View {
     @State var lonDegreesText: String = ""
     @State var lonMinutesText: String = ""
     @State var lonSecondsText: String = ""
-    @State var lonDirection: LongitudeDirection = .east
+    @State var lonDirection: LongitudeDirection = .west
 
     // Column-alignment state (iPhone stacked DDM/DMS card)
     @State var cardDegreesWidth: CGFloat = 0
@@ -75,37 +71,39 @@ public struct CoordinateField: View {
 
         // Synchronously populate segments from the initial binding value so the first
         // render shows filled fields and avoids a nil→non-nil flash on the caller's side.
+        // Direction is only set when magnitude > 0 — at exactly 0° the direction is
+        // ambiguous in IEEE 754 (-0.0 == 0.0), so we preserve the @State default.
         guard let pos = position.wrappedValue else { return }
         let fmt = format.wrappedValue
         let secsPrec = config.secondsPrecision
-        self._latitude = State(initialValue: pos.latitude)
-        self._longitude = State(initialValue: pos.longitude)
+        let setLatDir = pos.latitude.unsignedDecimalDegrees > 0
+        let setLonDir = pos.longitude.unsignedDecimalDegrees > 0
         switch fmt {
         case .signedDecimalDegrees:
             self._latDecimalDegreesText = State(initialValue: String(format: "%.5f", pos.latitude.decimalDegrees))
             self._lonDecimalDegreesText = State(initialValue: String(format: "%.5f", pos.longitude.decimalDegrees))
         case .decimalDegrees:
-            self._latDirection = State(initialValue: pos.latitude.direction)
+            if setLatDir { self._latDirection = State(initialValue: pos.latitude.direction) }
             self._latDecimalDegreesText = State(initialValue: String(format: "%.5f", pos.latitude.unsignedDecimalDegrees))
-            self._lonDirection = State(initialValue: pos.longitude.direction)
+            if setLonDir { self._lonDirection = State(initialValue: pos.longitude.direction) }
             self._lonDecimalDegreesText = State(initialValue: String(format: "%.5f", pos.longitude.unsignedDecimalDegrees))
         case .ddm:
             let latDDM = pos.latitude.degreesDecimalMinutes
             let lonDDM = pos.longitude.degreesDecimalMinutes
-            self._latDirection = State(initialValue: pos.latitude.direction)
+            if setLatDir { self._latDirection = State(initialValue: pos.latitude.direction) }
             self._latDegreesText = State(initialValue: String(latDDM.degrees))
             self._latMinutesText = State(initialValue: String(format: "%.3f", latDDM.minutes))
-            self._lonDirection = State(initialValue: pos.longitude.direction)
+            if setLonDir { self._lonDirection = State(initialValue: pos.longitude.direction) }
             self._lonDegreesText = State(initialValue: String(lonDDM.degrees))
             self._lonMinutesText = State(initialValue: String(format: "%.3f", lonDDM.minutes))
         case .dms:
             let latDMS = pos.latitude.degreesMinutesSeconds
             let lonDMS = pos.longitude.degreesMinutesSeconds
-            self._latDirection = State(initialValue: pos.latitude.direction)
+            if setLatDir { self._latDirection = State(initialValue: pos.latitude.direction) }
             self._latDegreesText = State(initialValue: String(latDMS.degrees))
             self._latMinutesText = State(initialValue: String(latDMS.minutes))
             self._latSecondsText = State(initialValue: String(format: "%.\(secsPrec)f", latDMS.seconds))
-            self._lonDirection = State(initialValue: pos.longitude.direction)
+            if setLonDir { self._lonDirection = State(initialValue: pos.longitude.direction) }
             self._lonDegreesText = State(initialValue: String(lonDMS.degrees))
             self._lonMinutesText = State(initialValue: String(lonDMS.minutes))
             self._lonSecondsText = State(initialValue: String(format: "%.\(secsPrec)f", lonDMS.seconds))
@@ -122,18 +120,16 @@ public struct CoordinateField: View {
         }
         .listRowBackground(Color.clear)
         .onChange(of: format) { _, _ in populateSegments() }
-        .onChange(of: latitude) { _, _ in assemblePosition() }
-        .onChange(of: longitude) { _, _ in assemblePosition() }
-        .onChange(of: latDecimalDegreesText) { _, _ in validateCurrentFormat() }
-        .onChange(of: latDegreesText) { _, _ in validateCurrentFormat() }
-        .onChange(of: latMinutesText) { _, _ in validateCurrentFormat() }
-        .onChange(of: latSecondsText) { _, _ in validateCurrentFormat() }
-        .onChange(of: latDirection) { _, _ in validateCurrentFormat() }
-        .onChange(of: lonDecimalDegreesText) { _, _ in validateCurrentFormat() }
-        .onChange(of: lonDegreesText) { _, _ in validateCurrentFormat() }
-        .onChange(of: lonMinutesText) { _, _ in validateCurrentFormat() }
-        .onChange(of: lonSecondsText) { _, _ in validateCurrentFormat() }
-        .onChange(of: lonDirection) { _, _ in validateCurrentFormat() }
+        .onChange(of: latDecimalDegreesText) { _, _ in assembleFromCurrentState() }
+        .onChange(of: latDegreesText) { _, _ in assembleFromCurrentState() }
+        .onChange(of: latMinutesText) { _, _ in assembleFromCurrentState() }
+        .onChange(of: latSecondsText) { _, _ in assembleFromCurrentState() }
+        .onChange(of: latDirection) { _, _ in assembleFromCurrentState() }
+        .onChange(of: lonDecimalDegreesText) { _, _ in assembleFromCurrentState() }
+        .onChange(of: lonDegreesText) { _, _ in assembleFromCurrentState() }
+        .onChange(of: lonMinutesText) { _, _ in assembleFromCurrentState() }
+        .onChange(of: lonSecondsText) { _, _ in assembleFromCurrentState() }
+        .onChange(of: lonDirection) { _, _ in assembleFromCurrentState() }
     }
 }
 
