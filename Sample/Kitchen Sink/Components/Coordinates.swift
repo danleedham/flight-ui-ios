@@ -119,7 +119,7 @@ struct Coordinates: View {
                 .fontStyle(theme.typography.caption1)
                 .padding(.top, theme.spacing.grid1x)
             LatitudeField(
-                latitude: .constant(Latitude(decimalDegrees: 51.4752)),
+                latitude: .constant(try? Latitude(decimalDegrees: 51.4752)),
                 format: .constant(.ddm),
                 config: CoordinateFieldConfig(cardinalStyle: .button)
             )
@@ -129,7 +129,7 @@ struct Coordinates: View {
                 .fontStyle(theme.typography.caption1)
                 .padding(.top, theme.spacing.grid1x)
             LatitudeField(
-                latitude: .constant(Latitude(decimalDegrees: 51.4752)),
+                latitude: .constant(try? Latitude(decimalDegrees: 51.4752)),
                 format: .constant(.ddm),
                 config: CoordinateFieldConfig(cardinalStyle: .segment)
             )
@@ -139,7 +139,7 @@ struct Coordinates: View {
                 .fontStyle(theme.typography.caption1)
                 .padding(.top, theme.spacing.grid1x)
             LongitudeField(
-                longitude: .constant(Longitude(decimalDegrees: -1.4752)),
+                longitude: .constant(try? Longitude(decimalDegrees: -1.4752)),
                 format: .constant(.dms),
                 config: CoordinateFieldConfig(cardinalStyle: .segment)
             )
@@ -170,7 +170,7 @@ struct Coordinates: View {
                 .fontStyle(theme.typography.caption1)
                 .padding(.top, theme.spacing.grid1x)
             LatitudeField(
-                latitude: .constant(Latitude(decimalDegrees: 51.4752)),
+                latitude: .constant(try? Latitude(decimalDegrees: 51.4752)),
                 format: .constant(.dms),
                 config: CoordinateFieldConfig(secondsPrecision: precision)
             )
@@ -203,7 +203,7 @@ struct Coordinates: View {
                 .fontStyle(theme.typography.caption1)
                 .padding(.top, theme.spacing.grid1x)
             LatitudeField(
-                latitude: .constant(Latitude(decimalDegrees: 51.4752)),
+                latitude: .constant(try? Latitude(decimalDegrees: 51.4752)),
                 format: .constant(.ddm),
                 alertingState: state
             )

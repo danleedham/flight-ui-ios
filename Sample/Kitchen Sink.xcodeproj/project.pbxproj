@@ -273,8 +273,8 @@
 			);
 			mainGroup = 83C93DB72986C53A00A911A9;
 			packageReferences = (
-				8398ECF52F5C705400BAC870 /* XCLocalSwiftPackageReference "../../FlightUI" */,
-				8398ECF92F5C709600BAC870 /* XCLocalSwiftPackageReference "../../../danleedham/AviationMaths" */,
+				8398ECF52F5C705400BAC870 /* XCLocalSwiftPackageReference ".." */,
+				8398ECF92F5C709600BAC870 /* XCRemoteSwiftPackageReference "AviationMathsFramework" */,
 			);
 			productRefGroup = 83C93DC12986C53A00A911A9 /* Products */;
 			projectDirPath = "";
@@ -624,15 +624,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		8398ECF52F5C705400BAC870 /* XCLocalSwiftPackageReference "../../FlightUI" */ = {
+		8398ECF52F5C705400BAC870 /* XCLocalSwiftPackageReference ".." */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../FlightUI;
-		};
-		8398ECF92F5C709600BAC870 /* XCLocalSwiftPackageReference "../../../danleedham/AviationMaths" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../../danleedham/AviationMaths;
+			relativePath = ..;
 		};
 /* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8398ECF92F5C709600BAC870 /* XCRemoteSwiftPackageReference "AviationMathsFramework" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Haelix-Code/AviationMathsFramework";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		55B64F3A2AC4C01C00AC21F5 /* FlightUI */ = {
@@ -649,6 +656,7 @@
 		};
 		8398ECFA2F5C709600BAC870 /* AviationMaths */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 8398ECF92F5C709600BAC870 /* XCRemoteSwiftPackageReference "AviationMathsFramework" */;
 			productName = AviationMaths;
 		};
 		83F3071D2F12ED5E0010D75C /* FlightUI */ = {

@@ -76,23 +76,25 @@ where Value: AngularCoordinate,
 
         // Synchronously populate segments from the initial binding value so the first
         // render shows filled fields and avoids a nil→non-nil flash on the caller's side.
+        // Direction is only set when magnitude > 0: at exactly 0° the direction is
+        // ambiguous (-0.0 == 0.0), so keep the default rather than forcing N/E.
         guard let val = value.wrappedValue else { return }
         let fmt = format.wrappedValue
         let secsPrec = config.secondsPrecision
+        if fmt != .signedDecimalDegrees, val.unsignedDecimalDegrees > 0 {
+            self._direction = State(initialValue: val.direction)
+        }
         switch fmt {
         case .signedDecimalDegrees:
             self._decimalDegreesText = State(initialValue: String(format: "%.5f", val.decimalDegrees))
         case .decimalDegrees:
-            self._direction = State(initialValue: val.direction)
             self._decimalDegreesText = State(initialValue: String(format: "%.5f", val.unsignedDecimalDegrees))
         case .ddm:
             let ddm = val.degreesDecimalMinutes
-            self._direction = State(initialValue: val.direction)
             self._degreesText = State(initialValue: String(ddm.degrees))
             self._minutesText = State(initialValue: String(format: "%.3f", ddm.minutes))
         case .dms:
             let dms = val.degreesMinutesSeconds
-            self._direction = State(initialValue: val.direction)
             self._degreesText = State(initialValue: String(dms.degrees))
             self._minutesText = State(initialValue: String(dms.minutes))
             self._secondsText = State(initialValue: String(format: "%.\(secsPrec)f", dms.seconds))
@@ -229,10 +231,8 @@ where Value: AngularCoordinate,
     }
 
     private func validateSignedDD() {
-        guard let val = Double(decimalDegreesText), Value.isValid(decimalDegrees: val) else {
-            value = nil; return
-        }
-        value = Value(decimalDegrees: val)
+        guard let val = Double(decimalDegreesText) else { value = nil; return }
+        value = try? Value(decimalDegrees: val)
     }
 
     private func validateUnsignedDD() {
@@ -241,8 +241,7 @@ where Value: AngularCoordinate,
             value = nil; return
         }
         let signed = direction == positiveDirection ? val : -val
-        guard Value.isValid(decimalDegrees: signed) else { value = nil; return }
-        value = Value(decimalDegrees: signed)
+        value = try? Value(decimalDegrees: signed)
     }
 
     private func validateDDM() {
@@ -253,8 +252,7 @@ where Value: AngularCoordinate,
               mins >= 0, mins < 60 else { value = nil; return }
         let decDeg = Double(degs) + mins / 60.0
         let signed = direction == positiveDirection ? decDeg : -decDeg
-        guard Value.isValid(decimalDegrees: signed) else { value = nil; return }
-        value = Value(decimalDegrees: signed)
+        value = try? Value(decimalDegrees: signed)
     }
 
     private func validateDMS() {
@@ -267,28 +265,29 @@ where Value: AngularCoordinate,
               secs >= 0, secs < 60 else { value = nil; return }
         let decDeg = Double(degs) + Double(mins) / 60.0 + secs / 3600.0
         let signed = direction == positiveDirection ? decDeg : -decDeg
-        guard Value.isValid(decimalDegrees: signed) else { value = nil; return }
-        value = Value(decimalDegrees: signed)
+        value = try? Value(decimalDegrees: signed)
     }
 
     // MARK: - Populate from Binding
 
     private func populateFromBinding() {
         guard let val = value else { clearSegments(); return }
+        // At exactly 0° the direction is ambiguous: keep whatever the user picked.
+        let updateDirection = val.unsignedDecimalDegrees > 0
         switch format {
         case .signedDecimalDegrees:
             decimalDegreesText = String(format: "%.5f", val.decimalDegrees)
         case .decimalDegrees:
-            direction = val.direction
+            if updateDirection { direction = val.direction }
             decimalDegreesText = String(format: "%.5f", val.unsignedDecimalDegrees)
         case .ddm:
             let ddm = val.degreesDecimalMinutes
-            direction = val.direction
+            if updateDirection { direction = val.direction }
             degreesText = String(ddm.degrees)
             minutesText = String(format: "%.3f", ddm.minutes)
         case .dms:
             let dms = val.degreesMinutesSeconds
-            direction = val.direction
+            if updateDirection { direction = val.direction }
             degreesText = String(dms.degrees)
             minutesText = String(dms.minutes)
             secondsText = String(format: "%.\(config.secondsPrecision)f", dms.seconds)

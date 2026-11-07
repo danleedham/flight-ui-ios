@@ -17,23 +17,21 @@ extension CoordinateField {
     func computeLatitude() -> Latitude? {
         switch format {
         case .signedDecimalDegrees:
-            return Double(latDecimalDegreesText).flatMap {
-                Latitude.isValid(decimalDegrees: $0) ? Latitude(decimalDegrees: $0) : nil
-            }
+            return Double(latDecimalDegreesText).flatMap { try? Latitude(decimalDegrees: $0) }
         case .decimalDegrees:
             guard let val = Double(latDecimalDegreesText), val >= 0, val <= 90 else { return nil }
             let signed = latDirection == .north ? val : -val
-            return Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
+            return try? Latitude(decimalDegrees: signed)
         case .ddm:
             guard let degs = Int(latDegreesText), let mins = Double(latMinutesText),
                   degs >= 0, degs <= 90, mins >= 0, mins < 60 else { return nil }
             let signed = (latDirection == .north ? 1.0 : -1.0) * (Double(degs) + mins / 60.0)
-            return Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
+            return try? Latitude(decimalDegrees: signed)
         case .dms:
             guard let degs = Int(latDegreesText), let mins = Int(latMinutesText), let secs = Double(latSecondsText),
                   degs >= 0, degs <= 90, mins >= 0, mins < 60, secs >= 0, secs < 60 else { return nil }
             let signed = (latDirection == .north ? 1.0 : -1.0) * (Double(degs) + Double(mins) / 60.0 + secs / 3600.0)
-            return Latitude.isValid(decimalDegrees: signed) ? Latitude(decimalDegrees: signed) : nil
+            return try? Latitude(decimalDegrees: signed)
         }
     }
 
@@ -41,23 +39,21 @@ extension CoordinateField {
     func computeLongitude() -> Longitude? {
         switch format {
         case .signedDecimalDegrees:
-            return Double(lonDecimalDegreesText).flatMap {
-                Longitude.isValid(decimalDegrees: $0) ? Longitude(decimalDegrees: $0) : nil
-            }
+            return Double(lonDecimalDegreesText).flatMap { try? Longitude(decimalDegrees: $0) }
         case .decimalDegrees:
             guard let val = Double(lonDecimalDegreesText), val >= 0, val <= 180 else { return nil }
             let signed = lonDirection == .east ? val : -val
-            return Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
+            return try? Longitude(decimalDegrees: signed)
         case .ddm:
             guard let degs = Int(lonDegreesText), let mins = Double(lonMinutesText),
                   degs >= 0, degs <= 180, mins >= 0, mins < 60 else { return nil }
             let signed = (lonDirection == .east ? 1.0 : -1.0) * (Double(degs) + mins / 60.0)
-            return Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
+            return try? Longitude(decimalDegrees: signed)
         case .dms:
             guard let degs = Int(lonDegreesText), let mins = Int(lonMinutesText), let secs = Double(lonSecondsText),
                   degs >= 0, degs <= 180, mins >= 0, mins < 60, secs >= 0, secs < 60 else { return nil }
             let signed = (lonDirection == .east ? 1.0 : -1.0) * (Double(degs) + Double(mins) / 60.0 + secs / 3600.0)
-            return Longitude.isValid(decimalDegrees: signed) ? Longitude(decimalDegrees: signed) : nil
+            return try? Longitude(decimalDegrees: signed)
         }
     }
 
