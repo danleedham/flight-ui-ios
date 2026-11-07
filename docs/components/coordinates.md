@@ -1,16 +1,16 @@
 # Coordinate Entry
 
-Segmented input fields for geographic position entry. Supports four formats, binds directly to [AviationMaths](https://github.com/danleedham/AviationMaths) types, and applies per-segment out-of-range validation following ISO 6709.
+Segmented input fields for geographic position entry. Supports four formats, binds directly to [AviationMaths](https://github.com/Haelix-Code/AviationMathsFramework) types, and applies per-segment out-of-range validation following ISO 6709.
 
 ![Coordinate Entry components](../assets/Coordinates.png)
 
 ## Requirements
 
-FlightUI depends on [AviationMaths](https://github.com/danleedham/AviationMaths). Host apps that bind to `Latitude`, `Longitude`, or `Position2D` in their own code must also add AviationMaths as an explicit package dependency:
+FlightUI depends on [AviationMaths](https://github.com/Haelix-Code/AviationMathsFramework). Host apps that bind to `Latitude`, `Longitude`, or `Position2D` in their own code must also add AviationMaths as an explicit package dependency:
 
 ```swift
 // Package.swift
-.package(url: "https://github.com/danleedham/AviationMaths", from: "1.0.0")
+.package(url: "https://github.com/Haelix-Code/AviationMathsFramework", .upToNextMinor(from: "0.4.0"))
 ```
 
 SwiftPM deduplicates packages automatically — declaring the same URL causes no type conflicts and no binary duplication.
@@ -232,7 +232,9 @@ var format: CoordinateFormat {
 
 ## Validation Model
 
-The binding only receives a typed value when **all** segments are filled and **all** are in-range. Invalid intermediate state is never written to the binding — this prevents the `precondition()` crash in AviationMaths initialisers.
+The binding only receives a typed value when **all** segments are filled and **all** are in-range. Invalid intermediate state is never written to the binding — out-of-range values are rejected (AviationMaths initialisers throw `CoordinateError`) and the binding is set to `nil`.
+
+At exactly 0° the hemisphere is ambiguous, so the fields keep whichever direction the user selected instead of following the model. AviationMaths treats 0° as N/E, so preview strings for a position on the equator or prime meridian show `N` / `E`.
 
 | Segment | Valid range |
 |---------|------------|

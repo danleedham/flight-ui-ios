@@ -10,7 +10,7 @@ let package = Package(
             targets: ["FlightUI"])
     ],
     dependencies: [
-        .package(url: "https://github.com/Haelix-Code/AviationMathsFramework", from: "0.2.0")
+        .package(url: "https://github.com/Haelix-Code/AviationMathsFramework", .upToNextMinor(from: "0.4.0"))
     ],
     targets: [
         .target(
